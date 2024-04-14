@@ -1,7 +1,19 @@
 .voice__channel__container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
-  grid-gap: 16px;
+  position: absolute;
+  max-height: 100vh;
+  overflow: auto;
+  display: flex;
+  flex-flow: column;
+  gap: 2rem;
+  /* margin: 2rem; */
+}
 
-  padding: 32px;
+.voice__channel__container::-webkit-scrollbar {
+  width: .5rem;
+  background-color: transparent;
+}
+
+.voice__channel__container::-webkit-scrollbar-thumb {
+  background-color: #404248;
+  border-radius: 5px;
 }
