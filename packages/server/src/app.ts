@@ -10,6 +10,8 @@ import path from 'path';
 import {GAME_NAME} from './shared/Constants';
 import {StateHandlerRoom} from './rooms/StateHandlerRoom';
 
+const { Client, Events, GatewayIntentBits } = require('discord.js');
+
 dotenv.config({path: '../../.env'});
 
 const app: Application = express();
@@ -21,6 +23,23 @@ const server = new Server({
     server: createServer(app),
   }),
 });
+
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers
+  ]
+});
+
+// When the client is ready, run this code (only once).
+// The distinction between `client: Client<boolean>` and `readyClient: Client<true>` is important for TypeScript developers.
+// It makes some properties non-nullable.
+client.once(Events.ClientReady, (readyClient: any) => {
+	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+});
+
+// Log in to Discord with your client's token
+client.login(process.env.DISCORD_BOT_TOKEN);
 
 // Game Rooms
 server
@@ -38,6 +57,16 @@ if (process.env.NODE_ENV === 'production') {
 
 // If you don't want people accessing your server stats, comment this line.
 router.use('/colyseus', monitor(server as Partial<MonitorOptions>));
+
+router.get('/hof', async (req: Request, res: Response) => {
+  const response = await fetch("https://raw.githubusercontent.com/originalnicodrgitbot/hall-of-framed-db/main/shotsdb.json")
+  const resJson = await response.json()
+  // DO NOT LOG THE WHOLE JSON, IT'S HUGE LIKE OVER 9000
+  const shots = Object.values(resJson["_default"])
+  const guild = await client.guilds.fetch(req.query.guildId as string);
+	const members = await guild.members.fetch();
+  res.send({shots, members})
+});
 
 // Fetch token from developer portal and return to the embedded app
 router.post('/token', async (req: Request, res: Response) => {

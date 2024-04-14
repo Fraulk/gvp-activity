@@ -30,6 +30,7 @@ const AuthenticatedContext = React.createContext<TAuthenticatedContext>({
     description: '',
   },
   guildMember: null,
+  guildId: "",
   client: undefined as unknown as Client,
   room: undefined as unknown as Room,
 });
@@ -106,16 +107,45 @@ function useAuthenticatedContextSetup() {
         access_token,
       });
 
+      // const allGuildsMember: any | null = await fetch(
+      //   `https://discord.com/api/v10/guilds/${discordSdk.guildId}/members`,
+      //   {
+      //     method: 'get',
+      //     headers: {Authorization: `Bearer ${access_token}`},
+      //   },
+      // )
+      //   .then((j) => j.json())
+      //   .catch((error) => {
+      //     console.error(error)
+      //     return null;
+      //   });
+
+      // Get guild specific nickname and avatar, and fallback to user name and avatar
+      // const allGuilds: any | null = await fetch(
+      //   `https://discord.com/api/v10/users/@me/guilds`,
+      //   {
+      //     method: 'get',
+      //     headers: {Authorization: `Bearer ${access_token}`},
+      //   },
+      // )
+      //   .then((j) => j.json())
+      //   .catch((error) => {
+      //     console.error(error)
+      //     return null;
+      //   });
+      //   const guildData = allGuilds?.find((g: any) => g.id === discordSdk.guildId);
+
       // Get guild specific nickname and avatar, and fallback to user name and avatar
       const guildMember: IGuildsMembersRead | null = await fetch(
-        `/discord/api/users/@me/guilds/${discordSdk.guildId}/member`,
+        `https://discord.com/api/v10/users/@me/guilds/${discordSdk.guildId}/member`,
         {
           method: 'get',
           headers: {Authorization: `Bearer ${access_token}`},
         },
       )
         .then((j) => j.json())
-        .catch(() => {
+        .catch((error) => {
+          console.error(error)
           return null;
         });
 
@@ -162,7 +192,7 @@ function useAuthenticatedContextSetup() {
       });
 
       // Finally, we construct our authenticatedContext object to be consumed throughout the app
-      setAuth({...newAuth, guildMember, client, room: newRoom});
+      setAuth({...newAuth, guildId: discordSdk.guildId ?? "", guildMember, client, room: newRoom});
     };
 
     if (!settingUp.current) {

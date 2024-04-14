@@ -8,7 +8,7 @@ export interface IColyseus {
   room: Room<State>;
   client: Client;
 }
-export type TAuthenticatedContext = TAuthenticateResponse & {guildMember: IGuildsMembersRead | null} & IColyseus;
+export type TAuthenticatedContext = TAuthenticateResponse & {guildMember: IGuildsMembersRead | null, guildId: string} & IColyseus;
 
 export interface IGuildsMembersRead {
   roles: string[];
