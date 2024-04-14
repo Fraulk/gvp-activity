@@ -29,3 +29,19 @@ export interface IGuildsMembersRead {
   mute: boolean;
   deaf: boolean;
 }
+
+export interface Shot {
+  ID: number;
+  author: string;
+  colorName: string;
+  date: string | Date;
+  epochTime: number;
+  gameName: string;
+  height: number;
+  message_id: string;
+  score: number;
+  shotUrl: string;
+  spoiler: boolean;
+  thumbnailUrl: string;
+  width: number;
+}

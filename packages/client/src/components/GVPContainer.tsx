@@ -1,25 +1,28 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import "./GVPContainer.scss"
 import { useAuthenticatedContext } from "../hooks/useAuthenticatedContext"
+import { Shot } from "../types"
 
 const GVPContainer = () => {
     const auth = useAuthenticatedContext()
     console.log(auth)
-
-    useEffect(() => {
-        const getHof = async () => {
-            const response = await fetch(`/api/hof?guildId=${auth.guildId}`)
-            const resJson = await response.json()
-            console.log(resJson)
-        }
-        getHof()
-    }, [])
+    const [shots, setShots] = useState([])
+    const [members, setMembers] = useState([])
+    const [currentShot, setCurrentShot] = useState<Shot | undefined>()
+    const shotsUrl = currentShot?.thumbnailUrl.replace("https://cdn.framedsc.com", "framedsc")
 
     const getHof = async () => {
         const response = await fetch(`/api/hof?guildId=${auth.guildId}`)
         const resJson = await response.json()
+        const { shots, members } = resJson
+        setShots(shots)
+        setMembers(members)
         console.log(resJson)
     }
+
+    useEffect(() => {
+        getHof()
+    }, [])
     
     const getRandomHofShot = () => {
         // lastShots = []
@@ -47,7 +50,9 @@ const GVPContainer = () => {
         //     if len(lastShots) > bufferSize:
         //         lastShots.pop()
         //     return shot
-
+        const shot = shots[Math.floor(Math.random() * shots.length)]
+        setCurrentShot(shot)
+        console.log(shot)
     }
 
     return (
@@ -55,6 +60,11 @@ const GVPContainer = () => {
             <button onClick={getHof}>
                 test /hof
             </button>
+            <button onClick={getRandomHofShot}>
+                get random hof shot
+            </button>
+            {currentShot?.gameName}
+            <img src={shotsUrl} alt="" />
         </div>
     )
 }
