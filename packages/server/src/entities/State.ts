@@ -1,59 +1,67 @@
-import {Schema, MapSchema, type} from '@colyseus/schema';
-import {TPlayerOptions, Player} from './Player';
+import { Schema, MapSchema, type } from '@colyseus/schema';
+import { TPlayerOptions, Player } from './Player';
+import { IShot, Shot } from './Shot';
 
 export interface IState {
-  roomName: string;
-  channelId: string;
+    roomName: string;
+    channelId: string;
 }
 
 export class State extends Schema {
-  @type({map: Player})
-  players = new MapSchema<Player>();
+    @type({ map: Player })
+    players = new MapSchema<Player>();
 
-  @type('string')
-  public roomName: string;
+    @type('string')
+    public roomName: string;
 
-  @type('string')
-  public channelId: string;
+    @type('string')
+    public channelId: string;
 
-  serverAttribute = 'this attribute wont be sent to the client-side';
+    @type(Shot)
+    public shot: Shot | null = null;
 
-  // Init
-  constructor(attributes: IState) {
-    super();
-    this.roomName = attributes.roomName;
-    this.channelId = attributes.channelId;
-  }
+    serverAttribute = 'this attribute wont be sent to the client-side';
 
-  private _getPlayer(sessionId: string): Player | undefined {
-    return Array.from(this.players.values()).find((p) => p.sessionId === sessionId);
-  }
-
-  createPlayer(sessionId: string, playerOptions: TPlayerOptions) {
-    const existingPlayer = Array.from(this.players.values()).find((p) => p.sessionId === sessionId);
-    if (existingPlayer == null) {
-      this.players.set(playerOptions.userId, new Player({...playerOptions, sessionId}));
+    // Init
+    constructor(attributes: IState) {
+        super();
+        this.roomName = attributes.roomName;
+        this.channelId = attributes.channelId;
     }
-  }
 
-  removePlayer(sessionId: string) {
-    const player = Array.from(this.players.values()).find((p) => p.sessionId === sessionId);
-    if (player != null) {
-      this.players.delete(player.userId);
+    private _getPlayer(sessionId: string): Player | undefined {
+        return Array.from(this.players.values()).find((p) => p.sessionId === sessionId);
     }
-  }
 
-  startTalking(sessionId: string) {
-    const player = this._getPlayer(sessionId);
-    if (player != null) {
-      player.talking = true;
+    createPlayer(sessionId: string, playerOptions: TPlayerOptions) {
+        const existingPlayer = Array.from(this.players.values()).find((p) => p.sessionId === sessionId);
+        if (existingPlayer == null) {
+            this.players.set(playerOptions.userId, new Player({ ...playerOptions, sessionId }));
+        }
     }
-  }
 
-  stopTalking(sessionId: string) {
-    const player = this._getPlayer(sessionId);
-    if (player != null) {
-      player.talking = false;
+    removePlayer(sessionId: string) {
+        const player = Array.from(this.players.values()).find((p) => p.sessionId === sessionId);
+        if (player != null) {
+            this.players.delete(player.userId);
+        }
     }
-  }
+
+    startTalking(sessionId: string) {
+        const player = this._getPlayer(sessionId);
+        if (player != null) {
+            player.talking = true;
+        }
+    }
+
+    stopTalking(sessionId: string) {
+        const player = this._getPlayer(sessionId);
+        if (player != null) {
+            player.talking = false;
+        }
+    }
+
+    setCurrentGame(newShot: IShot) {
+        this.shot = new Shot(newShot);
+    }
 }

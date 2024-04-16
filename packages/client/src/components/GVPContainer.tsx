@@ -2,27 +2,40 @@ import { useEffect, useState } from "react"
 import "./GVPContainer.scss"
 import { useAuthenticatedContext } from "../hooks/useAuthenticatedContext"
 import { Shot } from "../types"
+import { useShot } from "../hooks/useShotContext"
 
 const GVPContainer = () => {
-    const auth = useAuthenticatedContext()
-    console.log(auth)
+    const { guildId, room } = useAuthenticatedContext()
+    const synchronizedShot = useShot()
     const [shots, setShots] = useState([])
     const [members, setMembers] = useState([])
     const [currentShot, setCurrentShot] = useState<Shot | undefined>()
     const shotsUrl = currentShot?.thumbnailUrl.replace("https://cdn.framedsc.com", "framedsc")
 
+
     const getHof = async () => {
-        const response = await fetch(`/api/hof?guildId=${auth.guildId}`)
+        const response = await fetch(`/api/hof?guildId=${guildId}`)
         const resJson = await response.json()
         const { shots, members } = resJson
         setShots(shots)
         setMembers(members)
-        console.log(resJson)
+    }
+
+    const normalizeSynchronizedShot = (shot: any): Shot => {
+        return shot.reduce((acc: any, shot: any) => ({
+            ...acc,
+            [shot.field]: shot.value
+        }), {}) as Shot
     }
 
     useEffect(() => {
         getHof()
     }, [])
+
+    useEffect(() => {
+        if (synchronizedShot)
+            setCurrentShot(normalizeSynchronizedShot(synchronizedShot))
+    }, [synchronizedShot])
     
     const getRandomHofShot = () => {
         // lastShots = []
@@ -52,7 +65,7 @@ const GVPContainer = () => {
         //     return shot
         const shot = shots[Math.floor(Math.random() * shots.length)]
         setCurrentShot(shot)
-        console.log(shot)
+        room.send("setCurrentGame", shot)
     }
 
     return (
