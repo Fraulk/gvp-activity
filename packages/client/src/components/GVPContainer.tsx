@@ -11,7 +11,8 @@ const GVPContainer = () => {
     const [members, setMembers] = useState([])
     const [currentShot, setCurrentShot] = useState<Shot | undefined>()
     const shotsUrl = currentShot?.thumbnailUrl.replace("https://cdn.framedsc.com", "framedsc")
-
+    const blacklist = ["158655628531859456", "411108650720034817"]
+    const isBlacklisted = currentShot && blacklist.includes(currentShot?.author)
 
     const getHof = async () => {
         const response = await fetch(`/api/hof?guildId=${guildId}`)
@@ -22,10 +23,13 @@ const GVPContainer = () => {
     }
 
     const normalizeSynchronizedShot = (shot: any): Shot => {
-        return shot.reduce((acc: any, shot: any) => ({
-            ...acc,
-            [shot.field]: shot.value
-        }), {}) as Shot
+        return shot.reduce(
+            (acc: any, shot: any) => ({
+                ...acc,
+                [shot.field]: shot.value,
+            }),
+            {}
+        ) as Shot
     }
 
     useEffect(() => {
@@ -33,10 +37,9 @@ const GVPContainer = () => {
     }, [])
 
     useEffect(() => {
-        if (synchronizedShot)
-            setCurrentShot(normalizeSynchronizedShot(synchronizedShot))
+        if (synchronizedShot) setCurrentShot(normalizeSynchronizedShot(synchronizedShot))
     }, [synchronizedShot])
-    
+
     const getRandomHofShot = () => {
         // lastShots = []
         // blacklist = ["158655628531859456", "411108650720034817"]
@@ -70,14 +73,28 @@ const GVPContainer = () => {
 
     return (
         <div className="gvp__container">
-            <button onClick={getHof}>
-                test /hof
-            </button>
-            <button onClick={getRandomHofShot}>
-                get random hof shot
-            </button>
-            {currentShot?.gameName}
-            <img src={shotsUrl} alt="" />
+            <button onClick={getRandomHofShot}>get random hof shot</button>
+            <div className="gvp__body" style={{"--shot-color": currentShot?.colorName} as any}>
+                <div className="gvp__image" style={{"--shot-url": `url('${currentShot?.thumbnailUrl}')`} as any}>
+                    <div className="gvp__blurred-image">
+                        <img
+                            src={shotsUrl}
+                            alt=""
+                            onDragStart={(e) => {
+                                e.preventDefault()
+                            }}
+                        />
+                    </div>
+                    <img
+                        src={shotsUrl}
+                        alt=""
+                        className={isBlacklisted ? "gvp__image--blacklisted" : ""}
+                        onDragStart={(e) => {
+                            e.preventDefault()
+                        }}
+                    />
+                </div>
+            </div>
         </div>
     )
 }

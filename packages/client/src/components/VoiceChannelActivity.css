@@ -1,11 +1,12 @@
 .voice__channel__container {
   position: absolute;
   max-height: 100vh;
+  max-width: 10rem;
   overflow: auto;
   display: flex;
   flex-flow: column;
   gap: 2rem;
-  /* margin: 2rem; */
+  text-align: center;
 }
 
 .voice__channel__container::-webkit-scrollbar {

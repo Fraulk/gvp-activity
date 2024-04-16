@@ -66,7 +66,7 @@ export class Shot extends Schema {
         this.epochTime = props.epochTime;
         this.gameName = props.gameName;
         this.height = props.height;
-        this.message_id = props.message_id;
+        this.message_id = props.message_id.toString();
         this.score = props.score;
         this.shotUrl = props.shotUrl;
         this.spoiler = props.spoiler;
