@@ -10,17 +10,17 @@
         position: relative;
         width: 60%;
         height: 90%;
-        // display: flex;
-        // flex-direction: column;
-        // align-items: center;
-        // justify-content: center;
+        display: flex;
+        flex-flow: column;
+        justify-content: space-between;
         border-radius: 12px;
         border: 1px solid var(--shot-color);
-        background-color: #40444A;
+        background-color: #404248;
 
         .gvp__image {
             max-height: 400px;
             overflow: hidden;
+
             .gvp__blurred-image {
                 position: absolute;
                 // display: block;
@@ -39,7 +39,7 @@
                     // height: 100%;
                     max-height: 400px;
                     object-fit: cover;
-                    filter: blur(10px) brightness(0.5);
+                    filter: blur(10px) brightness(0.75);
                 }
             }
 
@@ -53,6 +53,74 @@
 
                 &.gvp__image--blacklisted {
                     transform: scale(1.1);
+                }
+            }
+        }
+
+        .gvp__guesses {
+            display: flex;
+            flex-flow: column nowrap;
+            justify-content: space-between;
+            // height: calc(100% - 400px);
+            border-radius: 0 0 12px 12px;
+
+            .gvp__guesses__list {}
+
+            .gvp__guesses__separator {
+                margin: 0 1rem;
+                height: 1px;
+                background-color: var(--shot-color);
+            }
+
+            .gvp__guesses__input {
+                position: relative;
+                display: flex;
+                width: 100%;
+                height: 50px;
+
+                input {
+                    width: 100%;
+                    // height: 100%;
+                    border: none;
+                    // background-color: var(--shot-color);
+                    background-color: #404248;
+                    color: white;
+                    font-size: 1.5rem;
+                    border-radius: 0 0 12px 12px;
+                    padding-left: 1rem;
+                    outline: none;
+                }
+
+                .gvp__guesses__autocomplete {
+                    width: 100%;
+                    position: absolute;
+                    bottom: 50px;
+                    background-color: #2b2d31;
+                    border-radius: 12px 12px 0 0;
+                    overflow: hidden;
+
+                    .gvp__guesses__autocomplete__item {
+                        padding: 0.5rem 1rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 1rem;
+                        cursor: pointer;
+                        border-bottom: 1px solid #35373c;
+
+                        &:hover, &.hasFocus {
+                            background-color: #35373c;
+                        }
+
+                        &:last-child {
+                            border: none;
+                        }
+
+                        img {
+                            width: 32px;
+                            height: 32px;
+                            border-radius: 100%;
+                        }
+                    }
                 }
             }
         }

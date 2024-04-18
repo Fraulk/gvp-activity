@@ -1,15 +1,41 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import "./GVPContainer.scss"
 import { useAuthenticatedContext } from "../hooks/useAuthenticatedContext"
 import { Shot } from "../types"
 import { useShot } from "../hooks/useShotContext"
+import { useOutsideAlerter } from "../hooks/useOutsideAlerter"
+import { useKeyPress } from "../hooks/useKeyPress"
+
+interface Member {
+    displayAvatarURL: string
+    displayName: string
+    nickname: string
+}
+
+const randomNames = ["Patrick", "Bob", "Alice", "John", "Doe", "Jane", "Putsos", "Putsovager", "Guy who takes screenshots", "Screen-Archer"]
+const randomNameFunc = randomNames[Math.floor(Math.random() * randomNames.length)] || "Name"
 
 const GVPContainer = () => {
     const { guildId, room } = useAuthenticatedContext()
     const synchronizedShot = useShot()
     const [shots, setShots] = useState([])
-    const [members, setMembers] = useState([])
+    const [members, setMembers] = useState<Member[]>([])
     const [currentShot, setCurrentShot] = useState<Shot | undefined>()
+    const [userGuess, setUserGuess] = useState("")
+    const [placeholder, setPlaceholder] = useState(randomNameFunc)
+    const [showAutocomplete, setShowAutocomplete] = useState(false)
+    const [focusedIndex, setFocusedIndex] = useState(-1)
+
+    const autocompleteRef = useRef<HTMLDivElement>(null)
+
+    const guessesAutocomplete: Member[] = useMemo(
+        () =>
+            userGuess.length > 0 && showAutocomplete
+                ? members.filter((member) => member.displayName?.includes(userGuess) || member.nickname?.includes(userGuess))
+                : [],
+        [userGuess, showAutocomplete]
+    )
+
     const shotsUrl = currentShot?.thumbnailUrl.replace("https://cdn.framedsc.com", "framedsc")
     const blacklist = ["158655628531859456", "411108650720034817"]
     const isBlacklisted = currentShot && blacklist.includes(currentShot?.author)
@@ -31,6 +57,39 @@ const GVPContainer = () => {
             {}
         ) as Shot
     }
+
+    const handleUserGuess = (value: string) => {
+        if (value.length > 0)
+            setShowAutocomplete(true)
+        else
+            setShowAutocomplete(false)
+        setUserGuess(value)
+        setFocusedIndex(-1)
+    }
+
+    const handleAutocompleteClick = (member: Member) => {
+        setUserGuess(member.displayName)
+        setShowAutocomplete(false)
+    }
+
+    const goUpward = () => setFocusedIndex((prev) => (prev > 0) ? prev - 1 : guessesAutocomplete.length - 1)
+    const goDownward = () => setFocusedIndex((prev) => (prev < guessesAutocomplete.length - 1) ? prev + 1 : 0)
+
+    useKeyPress(['Escape'], "", () => setShowAutocomplete(false));
+    
+    useKeyPress(['ArrowUp'], "", () => goUpward());
+    useKeyPress(['Tab'], "shiftKey", () => goUpward());
+
+    useKeyPress(['ArrowDown'], "", () => goDownward());
+    useKeyPress(['Tab'], "", () => goDownward());
+
+    useKeyPress(['Enter'], "", () => {
+        handleUserGuess(guessesAutocomplete[focusedIndex].displayName ?? "")
+        setShowAutocomplete(false)
+        setFocusedIndex(-1)
+    });
+
+    useOutsideAlerter([autocompleteRef], () => setShowAutocomplete(false))
 
     useEffect(() => {
         getHof()
@@ -69,13 +128,14 @@ const GVPContainer = () => {
         const shot = shots[Math.floor(Math.random() * shots.length)]
         setCurrentShot(shot)
         room.send("setCurrentGame", shot)
+        setPlaceholder(randomNameFunc)
     }
 
     return (
         <div className="gvp__container">
             <button onClick={getRandomHofShot}>get random hof shot</button>
-            <div className="gvp__body" style={{"--shot-color": currentShot?.colorName} as any}>
-                <div className="gvp__image" style={{"--shot-url": `url('${currentShot?.thumbnailUrl}')`} as any}>
+            <div className="gvp__body" style={{ "--shot-color": currentShot?.colorName } as any}>
+                <div className="gvp__image" style={{ "--shot-url": `url('${currentShot?.thumbnailUrl}')` } as any}>
                     <div className="gvp__blurred-image">
                         <img
                             src={shotsUrl}
@@ -93,6 +153,27 @@ const GVPContainer = () => {
                             e.preventDefault()
                         }}
                     />
+                </div>
+                <div className="gvp__guesses">
+                    <div className="gvp__guesses__list"></div>
+                    <div className="gvp__guesses__separator"></div>
+                    <div className="gvp__guesses__input">
+                        {guessesAutocomplete.length > 0 && (
+                            <div className="gvp__guesses__autocomplete" ref={autocompleteRef}>
+                                {guessesAutocomplete.map((member, i) => (
+                                    <div
+                                        key={member.displayName}
+                                        className={`gvp__guesses__autocomplete__item ${focusedIndex == i ? " hasFocus" : ""}`}
+                                        onClick={() => handleAutocompleteClick(member)}
+                                    >
+                                        <img src={member.displayAvatarURL} alt="" />
+                                        <span>{member.displayName}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        <input type="text" placeholder={placeholder} value={userGuess} onChange={(e) => handleUserGuess(e.target.value)} />
+                    </div>
                 </div>
             </div>
         </div>
