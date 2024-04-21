@@ -2,9 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import "./GVPContainer.scss"
 import { useAuthenticatedContext } from "../hooks/useAuthenticatedContext"
 import { Shot } from "../types"
-import { useShot } from "../hooks/useShotContext"
+import { useGame } from "../hooks/useGameContext"
 import { useOutsideAlerter } from "../hooks/useOutsideAlerter"
 import { useKeyPress } from "../hooks/useKeyPress"
+import { usePlayers } from "../hooks/usePlayers"
 
 interface Member {
     displayAvatarURL: string
@@ -16,8 +17,11 @@ const randomNames = ["Patrick", "Bob", "Alice", "John", "Doe", "Jane", "Putsos",
 const randomNameFunc = randomNames[Math.floor(Math.random() * randomNames.length)] || "Name"
 
 const GVPContainer = () => {
-    const { guildId, room } = useAuthenticatedContext()
-    const synchronizedShot = useShot()
+    const { guildMember, guildId, room } = useAuthenticatedContext()
+    const currentMemberId = guildMember?.user?.id
+    const {shot: synchronizedShot, guesses} = useGame()
+    const players = usePlayers();
+    const currentPlayer = players.find((player) => player.userId === currentMemberId)
     const [shots, setShots] = useState([])
     const [members, setMembers] = useState<Member[]>([])
     const [currentShot, setCurrentShot] = useState<Shot | undefined>()
@@ -84,7 +88,8 @@ const GVPContainer = () => {
     useKeyPress(['Tab'], "", () => goDownward());
 
     useKeyPress(['Enter'], "", () => {
-        handleUserGuess(guessesAutocomplete[focusedIndex].displayName ?? "")
+        if (!showAutocomplete) return
+        handleUserGuess(guessesAutocomplete[focusedIndex]?.displayName ?? "")
         setShowAutocomplete(false)
         setFocusedIndex(-1)
     });
@@ -131,6 +136,13 @@ const GVPContainer = () => {
         setPlaceholder(randomNameFunc)
     }
 
+    const handleGuess = () => {
+        if (currentShot && userGuess.length > 0) {
+            room.send("newGuess", { player: currentPlayer, message: userGuess })
+            setUserGuess("")
+        }
+    }
+
     return (
         <div className="gvp__container">
             <button onClick={getRandomHofShot}>get random hof shot</button>
@@ -149,13 +161,31 @@ const GVPContainer = () => {
                         src={shotsUrl}
                         alt=""
                         className={isBlacklisted ? "gvp__image--blacklisted" : ""}
-                        onDragStart={(e) => {
-                            e.preventDefault()
-                        }}
+                        onDragStart={(e) => e.preventDefault()}
                     />
                 </div>
                 <div className="gvp__guesses">
-                    <div className="gvp__guesses__list"></div>
+                    <div className="gvp__guesses__list">
+                        {guesses && guesses.map((guess, i) => {
+                            const isSameUserBefore = i > 0 && guesses[i - 1].player.userId === guess.player.userId
+                            
+                            return (
+                                <div key={i} className={`gvp__guesses__item ${isSameUserBefore ? "message__only" : ""}`}>
+                                    {isSameUserBefore ? (
+                                        <div className="gvp__guesses__item__only__message">{guess.message}</div>
+                                    ) : (
+                                        <>
+                                            <img src={guess.player.avatarUri} alt="" onDragStart={(e) => e.preventDefault()} />
+                                            <div>
+                                                <div className="gvp__guesses__item__name">{guess.player.name}</div>
+                                                <div className="gvp__guesses__item__message">{guess.message}</div>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            )
+                        })}
+                    </div>
                     <div className="gvp__guesses__separator"></div>
                     <div className="gvp__guesses__input">
                         {guessesAutocomplete.length > 0 && (
@@ -172,7 +202,10 @@ const GVPContainer = () => {
                                 ))}
                             </div>
                         )}
-                        <input type="text" placeholder={placeholder} value={userGuess} onChange={(e) => handleUserGuess(e.target.value)} />
+                        <input type="text" placeholder={placeholder} value={userGuess} onChange={(e) => handleUserGuess(e.target.value)} onKeyDown={(e) => e.key == "Enter" && (!showAutocomplete || guessesAutocomplete.length == 0) && handleGuess()} />
+                        <div className={`gvp__guesses__sendIcon ${userGuess?.length > 0 ? "active" : ""}`} onClick={handleGuess}>
+                            <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M6.6 10.02 14 11.4a.6.6 0 0 1 0 1.18L6.6 14l-2.94 5.87a1.48 1.48 0 0 0 1.99 1.98l17.03-8.52a1.48 1.48 0 0 0 0-2.64L5.65 2.16a1.48 1.48 0 0 0-1.99 1.98l2.94 5.88Z"></path></svg>
+                        </div>
                     </div>
                 </div>
             </div>

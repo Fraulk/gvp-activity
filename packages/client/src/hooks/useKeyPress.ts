@@ -1,6 +1,6 @@
 import { useRef, useLayoutEffect, useCallback, useEffect } from "react";
 
-export const useKeyPress = (keys: any, specialKey: string, callback: any, node = null) => {
+export const useKeyPress = (keys: any, specialKey: string, callback: any, node: HTMLElement | null = null) => {
     // implement the callback ref pattern
     const callbackRef = useRef(callback);
     useLayoutEffect(() => {

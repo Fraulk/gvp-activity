@@ -3,16 +3,16 @@ import {AuthenticatedContextProvider} from './hooks/useAuthenticatedContext';
 import {PlayersContextProvider} from './hooks/usePlayers';
 import {VoiceChannelActivity} from './components/VoiceChannelActivity';
 import GVPContainer from './components/GVPContainer';
-import { ShotContextProvider } from './hooks/useShotContext';
+import { GameContextProvider } from './hooks/useGameContext';
 
 export default function App() {
   return (
     <AuthenticatedContextProvider>
       <PlayersContextProvider>
-        <ShotContextProvider>
+        <GameContextProvider>
           <VoiceChannelActivity />
           <GVPContainer />
-        </ShotContextProvider>
+        </GameContextProvider>
       </PlayersContextProvider>
     </AuthenticatedContextProvider>
   );

@@ -20,6 +20,10 @@ export class StateHandlerRoom extends Room<State> {
     this.onMessage('setCurrentGame', (client, data) => {
         this.state.setCurrentGame(data);
     });
+
+    this.onMessage('newGuess', (client, data) => {
+        this.state.newGuess(data);
+    });
   }
 
   onAuth(_client: any, _options: any, _req: any) {

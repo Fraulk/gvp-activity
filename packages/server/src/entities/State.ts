@@ -1,6 +1,7 @@
-import { Schema, MapSchema, type } from '@colyseus/schema';
+import { Schema, MapSchema, type, ArraySchema } from '@colyseus/schema';
 import { TPlayerOptions, Player } from './Player';
 import { IShot, Shot } from './Shot';
+import { Guess, IGuess } from './Guess';
 
 export interface IState {
     roomName: string;
@@ -20,7 +21,8 @@ export class State extends Schema {
     @type(Shot)
     public shot: Shot | null = null;
 
-    serverAttribute = 'this attribute wont be sent to the client-side';
+    @type([ Guess ])
+    public guesses = new ArraySchema<Guess>();
 
     // Init
     constructor(attributes: IState) {
@@ -63,5 +65,12 @@ export class State extends Schema {
 
     setCurrentGame(newShot: IShot) {
         this.shot = new Shot(newShot);
+    }
+
+    newGuess(guess: IGuess) {
+        const player = this._getPlayer(guess.player.sessionId);
+        if (!player) return;
+        const newGuess = new Guess({ player, message: guess.message });
+        this.guesses.push(newGuess);
     }
 }
