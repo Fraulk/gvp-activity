@@ -105,7 +105,7 @@ const GVPContainer = () => {
     }, [synchronizedShot])
 
     useEffect(() => {
-        if (guessesListRef.current!.scrollTop + guessesListRef.current!.clientHeight + 20 == guessesListRef.current?.scrollHeight)
+        if (guessesListRef.current && guessesListRef.current.scrollTop + guessesListRef.current.clientHeight + 48 >= guessesListRef.current.scrollHeight)
             guessesListRef.current?.scrollTo(0, guessesListRef.current?.scrollHeight)
     }, [guesses])
 
