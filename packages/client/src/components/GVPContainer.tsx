@@ -11,6 +11,7 @@ interface Member {
     displayAvatarURL: string
     displayName: string
     nickname: string
+    userId: string
 }
 
 const randomNames = ["Patrick", "Bob", "Alice", "John", "Doe", "Jane", "Putsos", "Putsovager", "Guy who takes screenshots", "Screen-Archer"]
@@ -25,6 +26,7 @@ const GVPContainer = () => {
     const [shots, setShots] = useState([])
     const [members, setMembers] = useState<Member[]>([])
     const [currentShot, setCurrentShot] = useState<Shot | undefined>()
+    const [currentShotAuthor, setCurrentShotAuthor] = useState<Member>()
     const [userGuess, setUserGuess] = useState("")
     const [placeholder, setPlaceholder] = useState(randomNameFunc)
     const [showAutocomplete, setShowAutocomplete] = useState(false)
@@ -43,7 +45,8 @@ const GVPContainer = () => {
     )
 
     const shotsUrl = currentShot?.thumbnailUrl.replace("https://cdn.framedsc.com", "framedsc")
-    const blacklist = ["158655628531859456", "411108650720034817"]
+    // ItsYFP: 158655628531859456, Denis_VP (can't remember why): 411108650720034817
+    const blacklist = ["411108650720034817"]
     const isBlacklisted = currentShot && blacklist.includes(currentShot?.author)
 
     const getHof = async () => {
@@ -135,7 +138,15 @@ const GVPContainer = () => {
         //     if len(lastShots) > bufferSize:
         //         lastShots.pop()
         //     return shot
-        const shot = shots[Math.floor(Math.random() * shots.length)]
+        let shot: any
+        let member: any
+        while (true) {
+            shot = shots[Math.floor(Math.random() * shots.length)]
+            if (blacklist.includes(shot.author)) continue
+            member = members.find((member) => member.userId == shot.author)
+            if (member) break
+        }
+        setCurrentShotAuthor(member)
         setCurrentShot(shot)
         room.send("setCurrentGame", shot)
         setPlaceholder(randomNameFunc)
@@ -146,12 +157,16 @@ const GVPContainer = () => {
             room.send("newGuess", { player: currentPlayer, message: userGuess })
             setUserGuess("")
             inputRef.current?.focus()
+            if (userGuess === currentShotAuthor?.displayName || userGuess === currentShotAuthor?.nickname) {
+                room.send("newGuess", { player: currentPlayer, message: "TESTSETSETSE", hasWon: true, author: currentShotAuthor?.displayName})
+                getRandomHofShot()
+            }
         }
     }
 
     return (
         <div className="gvp__container">
-            <button onClick={getRandomHofShot}>get random hof shot</button>
+            {/* <button onClick={getRandomHofShot}>get random hof shot</button> */}
             <div className="gvp__body" style={{ "--shot-color": currentShot?.colorName } as any}>
                 <div className="gvp__image" style={{ "--shot-url": `url('${currentShot?.thumbnailUrl}')` } as any}>
                     <div className="gvp__blurred-image">
@@ -176,7 +191,11 @@ const GVPContainer = () => {
                             guesses.map((guess, i) => {
                                 const isSameUserBefore = i > 0 && guesses[i - 1].player.userId === guess.player.userId
 
-                                return (
+                                return guess.hasWon ? (
+                                    <div className="gvp__guesses__item__winner">
+                                        {guess.player.name} found who's that VP! It was {guess.author}!
+                                    </div>
+                                ) : (
                                     <div key={i} className={`gvp__guesses__item ${isSameUserBefore ? "message__only" : ""}`}>
                                         {isSameUserBefore ? (
                                             <div className="gvp__guesses__item__only__message">{guess.message}</div>

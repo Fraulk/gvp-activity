@@ -126,6 +126,33 @@
                         padding-bottom: .25rem;
                     }
                 }
+
+                .gvp__guesses__item__winner {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    color: #949ba4;
+                    font-weight: 600;
+                    white-space: nowrap;
+
+                    &::before {
+                        content: "";
+                        display: block;
+                        width: 100%;
+                        height: 1px;
+                        margin: 0 1rem;
+                        background-color: #585a5f;
+                    }
+
+                    &::after {
+                        content: "";
+                        display: block;
+                        width: 100%;
+                        height: 1px;
+                        margin: 0 1rem;
+                        background-color: #585a5f;
+                    }
+                }
             }
 
             .gvp__guesses__separator {

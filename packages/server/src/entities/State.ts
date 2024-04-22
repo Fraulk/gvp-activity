@@ -70,7 +70,7 @@ export class State extends Schema {
     newGuess(guess: IGuess) {
         const player = this._getPlayer(guess.player.sessionId);
         if (!player) return;
-        const newGuess = new Guess({ player, message: guess.message });
+        const newGuess = new Guess({ player, message: guess.message, hasWon: guess.hasWon ?? false, author: guess.author ?? ""});
         this.guesses.push(newGuess);
     }
 }

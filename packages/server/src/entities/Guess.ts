@@ -3,7 +3,9 @@ import { Player } from './Player';
 
 export interface IGuess {
   player: Player,
-  message: string
+  message: string,
+  hasWon: boolean,
+  author: string,
 }
 
 export class Guess extends Schema {
@@ -13,10 +15,18 @@ export class Guess extends Schema {
   @type('string')
   public message: string;
 
+  @type('boolean')
+  public hasWon: boolean;
+
+  @type('string')
+  public author: string;
+
   // Init
-  constructor({player, message}: IGuess) {
+  constructor({player, message, hasWon, author}: IGuess) {
     super();
     this.player = player;
     this.message = message;
+    this.hasWon = hasWon;
+    this.author = author;
   }
 }
