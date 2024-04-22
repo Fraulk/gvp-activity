@@ -21,6 +21,10 @@ export class StateHandlerRoom extends Room<State> {
         this.state.setCurrentGame(data);
     });
 
+    this.onMessage('setCurrentAuthor', (client, data) => {
+        this.state.setCurrentAuthor(data);
+    });
+
     this.onMessage('newGuess', (client, data) => {
         this.state.newGuess(data);
     });

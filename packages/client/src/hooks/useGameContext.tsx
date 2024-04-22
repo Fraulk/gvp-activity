@@ -2,8 +2,9 @@ import { ReactNode, createContext, useContext, useEffect, useState } from "react
 import { Shot as ShotState } from "../../../server/src/entities/Shot"
 import { useAuthenticatedContext } from "./useAuthenticatedContext"
 import { IGuess } from "../../../server/src/entities/Guess"
+import { Author as AuthorState } from "../../../server/src/entities/Author"
 
-const GameContext = createContext<{ shot: ShotState | undefined; guesses: IGuess[] }>({ shot: undefined, guesses: [] })
+const GameContext = createContext<{ shot: ShotState | undefined; author: AuthorState | undefined; guesses: IGuess[] }>({ shot: undefined, author: undefined, guesses: [] })
 
 export function GameContextProvider({ children }: { children: ReactNode }) {
     const game = useGameContextSetup()
@@ -17,6 +18,7 @@ export function useGame() {
 
 function useGameContextSetup() {
     const [shot, setShot] = useState<ShotState | undefined>()
+    const [author, setAuthor] = useState<AuthorState | undefined>()
     const [guesses, setGuesses] = useState<IGuess[]>([])
 
     const authenticatedContext = useAuthenticatedContext()
@@ -26,6 +28,11 @@ function useGameContextSetup() {
             if (authenticatedContext.room.state.shot) {
                 authenticatedContext.room.state.shot.onChange = (_shot: any) => {
                     setShot(_shot)
+                }
+            }
+            if (authenticatedContext.room.state.author) {
+                authenticatedContext.room.state.author.onChange = (_author: any) => {
+                    setAuthor(_author)
                 }
             }
             if (authenticatedContext.room.state.guesses) {
@@ -54,7 +61,7 @@ function useGameContextSetup() {
         } catch (e) {
             console.error("Couldn't change shot:", e)
         }
-    }, [authenticatedContext.room.state.shot, authenticatedContext.room.state.guesses])
+    }, [authenticatedContext.room.state.shot, authenticatedContext.room.state.author, authenticatedContext.room.state.guesses])
 
-    return { shot, guesses }
+    return { shot, author, guesses }
 }

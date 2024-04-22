@@ -2,6 +2,7 @@ import { Schema, MapSchema, type, ArraySchema } from '@colyseus/schema';
 import { TPlayerOptions, Player } from './Player';
 import { IShot, Shot } from './Shot';
 import { Guess, IGuess } from './Guess';
+import { Author, Member } from './Author';
 
 export interface IState {
     roomName: string;
@@ -20,6 +21,9 @@ export class State extends Schema {
 
     @type(Shot)
     public shot: Shot | null = null;
+
+    @type(Author)
+    public author: Author | null = null;
 
     @type([ Guess ])
     public guesses = new ArraySchema<Guess>();
@@ -65,6 +69,10 @@ export class State extends Schema {
 
     setCurrentGame(newShot: IShot) {
         this.shot = new Shot(newShot);
+    }
+
+    setCurrentAuthor(newAuthor: Member) {
+        this.author = new Author(newAuthor);
     }
 
     newGuess(guess: IGuess) {

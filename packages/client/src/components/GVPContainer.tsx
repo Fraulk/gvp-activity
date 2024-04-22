@@ -20,7 +20,7 @@ const randomNameFunc = randomNames[Math.floor(Math.random() * randomNames.length
 const GVPContainer = () => {
     const { guildMember, guildId, room } = useAuthenticatedContext()
     const currentMemberId = guildMember?.user?.id
-    const { shot: synchronizedShot, guesses } = useGame()
+    const { shot: synchronizedShot, author: synchronizedAuthor, guesses } = useGame()
     const players = usePlayers()
     const currentPlayer = players.find((player) => player.userId === currentMemberId)
     const [shots, setShots] = useState([])
@@ -57,14 +57,14 @@ const GVPContainer = () => {
         setMembers(members)
     }
 
-    const normalizeSynchronizedShot = (shot: any): Shot => {
+    const normalizeSynchronizedElement = (shot: any): any => {
         return shot.reduce(
             (acc: any, shot: any) => ({
                 ...acc,
                 [shot.field]: shot.value,
             }),
             {}
-        ) as Shot
+        )
     }
 
     const handleUserGuess = (value: string) => {
@@ -104,8 +104,12 @@ const GVPContainer = () => {
     }, [])
 
     useEffect(() => {
-        if (synchronizedShot) setCurrentShot(normalizeSynchronizedShot(synchronizedShot))
+        if (synchronizedShot) setCurrentShot(normalizeSynchronizedElement(synchronizedShot))
     }, [synchronizedShot])
+
+    useEffect(() => {
+        if (synchronizedAuthor) setCurrentShotAuthor(normalizeSynchronizedElement(synchronizedAuthor))
+    }, [synchronizedAuthor])
 
     useEffect(() => {
         if (guessesListRef.current && guessesListRef.current.scrollTop + guessesListRef.current.clientHeight + 48 >= guessesListRef.current.scrollHeight)
@@ -149,6 +153,7 @@ const GVPContainer = () => {
         setCurrentShotAuthor(member)
         setCurrentShot(shot)
         room.send("setCurrentGame", shot)
+        room.send("setCurrentAuthor", member)
         setPlaceholder(randomNameFunc)
     }
 
@@ -166,7 +171,7 @@ const GVPContainer = () => {
 
     return (
         <div className="gvp__container">
-            {/* <button onClick={getRandomHofShot}>get random hof shot</button> */}
+            <button onClick={getRandomHofShot}>get random hof shot</button>
             <div className="gvp__body" style={{ "--shot-color": currentShot?.colorName } as any}>
                 <div className="gvp__image" style={{ "--shot-url": `url('${currentShot?.thumbnailUrl}')` } as any}>
                     <div className="gvp__blurred-image">
