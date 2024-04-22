@@ -14,7 +14,7 @@ interface Member {
     userId: string
 }
 
-const randomNames = ["Patrick", "Bob", "Alice", "John", "Doe", "Jane", "Putsos", "Putsovager", "Guy who takes screenshots", "Screen-Archer"]
+const randomNames = ["Patrick", "Bob", "Alice", "John", "Doe", "Jane", "Putsos", "Putsovager", "Guy who takes screenshots", "Screen-Archer", "VP"]
 const randomNameFunc = randomNames[Math.floor(Math.random() * randomNames.length)] || "Name"
 
 const GVPContainer = () => {
@@ -39,7 +39,7 @@ const GVPContainer = () => {
     const guessesAutocomplete: Member[] = useMemo(
         () =>
             userGuess.length > 0 && showAutocomplete
-                ? members.filter((member) => member.displayName?.includes(userGuess) || member.nickname?.includes(userGuess))
+                ? members.filter((member) => member.displayName?.toLowerCase().includes(userGuess.toLowerCase()) || member.nickname?.toLowerCase().includes(userGuess.toLowerCase()))
                 : [],
         [userGuess, showAutocomplete]
     )
@@ -92,7 +92,10 @@ const GVPContainer = () => {
 
     useKeyPress(["Enter"], "", () => {
         if (!showAutocomplete) return
-        handleUserGuess(guessesAutocomplete[focusedIndex]?.displayName ?? "")
+        if (guessesAutocomplete.length == 1)
+            handleUserGuess(guessesAutocomplete[0]?.displayName ?? "")
+        else
+            handleUserGuess(guessesAutocomplete[focusedIndex]?.displayName ?? "")
         setShowAutocomplete(false)
         setFocusedIndex(-1)
     })
@@ -218,38 +221,40 @@ const GVPContainer = () => {
                             })}
                     </div>
                     <div className="gvp__guesses__separator"></div>
-                    <div className="gvp__guesses__input">
-                        {guessesAutocomplete.length > 0 && (
-                            <div className="gvp__guesses__autocomplete" ref={autocompleteRef}>
-                                {guessesAutocomplete.map((member, i) => (
-                                    <div
-                                        key={member.displayName}
-                                        className={`gvp__guesses__autocomplete__item ${focusedIndex == i ? " hasFocus" : ""}`}
-                                        onClick={() => handleAutocompleteClick(member)}
-                                    >
-                                        <img src={member.displayAvatarURL} alt="" />
-                                        <span>{member.displayName}</span>
-                                    </div>
-                                ))}
+                    {currentShot && (
+                        <div className="gvp__guesses__input">
+                            {guessesAutocomplete.length > 0 && (
+                                <div className="gvp__guesses__autocomplete" ref={autocompleteRef}>
+                                    {guessesAutocomplete.map((member, i) => (
+                                        <div
+                                            key={member.displayName}
+                                            className={`gvp__guesses__autocomplete__item ${focusedIndex == i ? " hasFocus" : ""}`}
+                                            onClick={() => handleAutocompleteClick(member)}
+                                        >
+                                            <img src={member.displayAvatarURL} alt="" />
+                                            <span>{member.displayName}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            <input
+                                type="text"
+                                ref={inputRef}
+                                placeholder={placeholder}
+                                value={userGuess}
+                                onChange={(e) => handleUserGuess(e.target.value)}
+                                onKeyDown={(e) => e.key == "Enter" && (!showAutocomplete || guessesAutocomplete.length == 0) && handleGuess()}
+                            />
+                            <div className={`gvp__guesses__sendIcon ${userGuess?.length > 0 ? "active" : ""}`} onClick={handleGuess}>
+                                <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path
+                                        fill="currentColor"
+                                        d="M6.6 10.02 14 11.4a.6.6 0 0 1 0 1.18L6.6 14l-2.94 5.87a1.48 1.48 0 0 0 1.99 1.98l17.03-8.52a1.48 1.48 0 0 0 0-2.64L5.65 2.16a1.48 1.48 0 0 0-1.99 1.98l2.94 5.88Z"
+                                    ></path>
+                                </svg>
                             </div>
-                        )}
-                        <input
-                            type="text"
-                            ref={inputRef}
-                            placeholder={placeholder}
-                            value={userGuess}
-                            onChange={(e) => handleUserGuess(e.target.value)}
-                            onKeyDown={(e) => e.key == "Enter" && (!showAutocomplete || guessesAutocomplete.length == 0) && handleGuess()}
-                        />
-                        <div className={`gvp__guesses__sendIcon ${userGuess?.length > 0 ? "active" : ""}`} onClick={handleGuess}>
-                            <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <path
-                                    fill="currentColor"
-                                    d="M6.6 10.02 14 11.4a.6.6 0 0 1 0 1.18L6.6 14l-2.94 5.87a1.48 1.48 0 0 0 1.99 1.98l17.03-8.52a1.48 1.48 0 0 0 0-2.64L5.65 2.16a1.48 1.48 0 0 0-1.99 1.98l2.94 5.88Z"
-                                ></path>
-                            </svg>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </div>
