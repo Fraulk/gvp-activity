@@ -28,6 +28,47 @@
             }
         }
 
+        .gvp__startGame {
+            display: flex;
+            flex-flow: column nowrap;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            border-radius: 12px;
+            background-color: #2b2d31;
+            color: white;
+            user-select: none;
+
+            .gvp__startGame__title {
+                font-size: 2rem;
+                font-weight: 600;
+                margin-bottom: .25rem;
+            }
+
+            .gvp__startGame__description {
+                font-size: 1.25rem;
+                text-align: center;
+                margin-bottom: 1.5rem;
+            }
+
+            button {
+                all: unset;
+                padding: .75rem 1.5rem;
+                padding-top: .5rem;
+                border-radius: 12px;
+                background-color: #6067ee;
+                color: white;
+                font-size: 1.25rem;
+                font-weight: 600;
+                transition: background-color 0.2s ease-in-out;
+                cursor: pointer;
+
+                &:hover {
+                    background-color: #4c53d4;
+                }
+            }
+        }
+
         .gvp__image {
             height: 50%;
             overflow: hidden;
@@ -53,6 +94,14 @@
                     max-height: 400px;
                     object-fit: cover;
                     filter: blur(10px) brightness(0.75);
+                }
+
+                span {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    color: white;
                 }
             }
 

@@ -31,6 +31,7 @@ const GVPContainer = () => {
     const [placeholder, setPlaceholder] = useState(randomNameFunc)
     const [showAutocomplete, setShowAutocomplete] = useState(false)
     const [focusedIndex, setFocusedIndex] = useState(-1)
+    const [showHintOnBrokenImage, setShowHintOnBrokenImage] = useState(false)
 
     const autocompleteRef = useRef<HTMLDivElement>(null)
     const guessesListRef = useRef<HTMLDivElement>(null)
@@ -107,7 +108,12 @@ const GVPContainer = () => {
     }, [])
 
     useEffect(() => {
-        if (synchronizedShot) setCurrentShot(normalizeSynchronizedElement(synchronizedShot))
+        if (synchronizedShot) {
+            setCurrentShot(normalizeSynchronizedElement(synchronizedShot))
+            setTimeout(() => {
+                setShowHintOnBrokenImage(true)
+            }, 5000);
+        }
     }, [synchronizedShot])
 
     useEffect(() => {
@@ -174,88 +180,99 @@ const GVPContainer = () => {
 
     return (
         <div className="gvp__container">
-            <button onClick={getRandomHofShot}>get random hof shot</button>
+            {/* <button onClick={getRandomHofShot}>get random hof shot</button> */}
             <div className="gvp__body" style={{ "--shot-color": currentShot?.colorName } as any}>
-                <div className="gvp__image" style={{ "--shot-url": `url('${currentShot?.thumbnailUrl}')` } as any}>
-                    <div className="gvp__blurred-image">
-                        <img
-                            src={shotsUrl}
-                            alt=""
-                            onDragStart={(e) => {
-                                e.preventDefault()
-                            }}
-                        />
+                {currentShot == undefined ? (
+                    <div className="gvp__startGame">
+                        <div className="gvp__startGame__title">Welcome to Guess Who's That VP!</div>
+                        <div className="gvp__startGame__description">This is the discord activity version of the game, playable only in VC</div>
+                        <button onClick={getRandomHofShot}>Start Game</button>
                     </div>
-                    <img
-                        src={shotsUrl}
-                        alt=""
-                        className={isBlacklisted ? "gvp__image--blacklisted" : ""}
-                        onDragStart={(e) => e.preventDefault()}
-                    />
-                </div>
-                <div className="gvp__guesses">
-                    <div className="gvp__guesses__list" ref={guessesListRef}>
-                        {guesses &&
-                            guesses.map((guess, i) => {
-                                const isSameUserBefore = i > 0 && guesses[i - 1].player.userId === guess.player.userId
-
-                                return guess.hasWon ? (
-                                    <div className="gvp__guesses__item__winner">
-                                        {guess.player.name} found who's that VP! It was {guess.author}!
-                                    </div>
-                                ) : (
-                                    <div key={i} className={`gvp__guesses__item ${isSameUserBefore ? "message__only" : ""}`}>
-                                        {isSameUserBefore ? (
-                                            <div className="gvp__guesses__item__only__message">{guess.message}</div>
+                ) : (
+                    <>
+                        <div className="gvp__image" style={{ "--shot-url": `url('${currentShot?.thumbnailUrl}')` } as any}>
+                            <div className="gvp__blurred-image">
+                                <img
+                                    src={shotsUrl}
+                                    alt=""
+                                    onDragStart={(e) => {
+                                        e.preventDefault()
+                                    }}
+                                />
+                                {showHintOnBrokenImage && <span>If the shot didn't load correctly, here's the answer: {currentShotAuthor?.displayName}</span>}
+                            </div>
+                            <img
+                                src={shotsUrl}
+                                alt=""
+                                className={isBlacklisted ? "gvp__image--blacklisted" : ""}
+                                onDragStart={(e) => e.preventDefault()}
+                            />
+                        </div>
+                        <div className="gvp__guesses">
+                            <div className="gvp__guesses__list" ref={guessesListRef}>
+                                {guesses &&
+                                    guesses.map((guess, i) => {
+                                        const isSameUserBefore = i > 0 && guesses[i - 1].player.userId === guess.player.userId
+        
+                                        return guess.hasWon ? (
+                                            <div className="gvp__guesses__item__winner">
+                                                {guess.player.name} found who's that VP! It was {guess.author}!
+                                            </div>
                                         ) : (
-                                            <>
-                                                <img src={guess.player.avatarUri} alt="" onDragStart={(e) => e.preventDefault()} />
-                                                <div>
-                                                    <div className="gvp__guesses__item__name">{guess.player.name}</div>
-                                                    <div className="gvp__guesses__item__message">{guess.message}</div>
+                                            <div key={i} className={`gvp__guesses__item ${isSameUserBefore ? "message__only" : ""}`}>
+                                                {isSameUserBefore ? (
+                                                    <div className="gvp__guesses__item__only__message">{guess.message}</div>
+                                                ) : (
+                                                    <>
+                                                        <img src={guess.player.avatarUri} alt="" onDragStart={(e) => e.preventDefault()} />
+                                                        <div>
+                                                            <div className="gvp__guesses__item__name">{guess.player.name}</div>
+                                                            <div className="gvp__guesses__item__message">{guess.message}</div>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        )
+                                    })}
+                            </div>
+                            <div className="gvp__guesses__separator"></div>
+                            {currentShot && (
+                                <div className="gvp__guesses__input">
+                                    {guessesAutocomplete.length > 0 && (
+                                        <div className="gvp__guesses__autocomplete" ref={autocompleteRef}>
+                                            {guessesAutocomplete.map((member, i) => (
+                                                <div
+                                                    key={member.displayName}
+                                                    className={`gvp__guesses__autocomplete__item ${focusedIndex == i ? " hasFocus" : ""}`}
+                                                    onClick={() => handleAutocompleteClick(member)}
+                                                >
+                                                    <img src={member.displayAvatarURL} alt="" />
+                                                    <span>{member.displayName}</span>
                                                 </div>
-                                            </>
-                                        )}
-                                    </div>
-                                )
-                            })}
-                    </div>
-                    <div className="gvp__guesses__separator"></div>
-                    {currentShot && (
-                        <div className="gvp__guesses__input">
-                            {guessesAutocomplete.length > 0 && (
-                                <div className="gvp__guesses__autocomplete" ref={autocompleteRef}>
-                                    {guessesAutocomplete.map((member, i) => (
-                                        <div
-                                            key={member.displayName}
-                                            className={`gvp__guesses__autocomplete__item ${focusedIndex == i ? " hasFocus" : ""}`}
-                                            onClick={() => handleAutocompleteClick(member)}
-                                        >
-                                            <img src={member.displayAvatarURL} alt="" />
-                                            <span>{member.displayName}</span>
+                                            ))}
                                         </div>
-                                    ))}
+                                    )}
+                                    <input
+                                        type="text"
+                                        ref={inputRef}
+                                        placeholder={placeholder}
+                                        value={userGuess}
+                                        onChange={(e) => handleUserGuess(e.target.value)}
+                                        onKeyDown={(e) => e.key == "Enter" && (!showAutocomplete || guessesAutocomplete.length == 0) && handleGuess()}
+                                    />
+                                    <div className={`gvp__guesses__sendIcon ${userGuess?.length > 0 ? "active" : ""}`} onClick={handleGuess}>
+                                        <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <path
+                                                fill="currentColor"
+                                                d="M6.6 10.02 14 11.4a.6.6 0 0 1 0 1.18L6.6 14l-2.94 5.87a1.48 1.48 0 0 0 1.99 1.98l17.03-8.52a1.48 1.48 0 0 0 0-2.64L5.65 2.16a1.48 1.48 0 0 0-1.99 1.98l2.94 5.88Z"
+                                            ></path>
+                                        </svg>
+                                    </div>
                                 </div>
                             )}
-                            <input
-                                type="text"
-                                ref={inputRef}
-                                placeholder={placeholder}
-                                value={userGuess}
-                                onChange={(e) => handleUserGuess(e.target.value)}
-                                onKeyDown={(e) => e.key == "Enter" && (!showAutocomplete || guessesAutocomplete.length == 0) && handleGuess()}
-                            />
-                            <div className={`gvp__guesses__sendIcon ${userGuess?.length > 0 ? "active" : ""}`} onClick={handleGuess}>
-                                <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <path
-                                        fill="currentColor"
-                                        d="M6.6 10.02 14 11.4a.6.6 0 0 1 0 1.18L6.6 14l-2.94 5.87a1.48 1.48 0 0 0 1.99 1.98l17.03-8.52a1.48 1.48 0 0 0 0-2.64L5.65 2.16a1.48 1.48 0 0 0-1.99 1.98l2.94 5.88Z"
-                                    ></path>
-                                </svg>
-                            </div>
                         </div>
-                    )}
-                </div>
+                    </>
+                )}
             </div>
         </div>
     )
