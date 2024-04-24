@@ -32,6 +32,7 @@ const GVPContainer = () => {
     const [showAutocomplete, setShowAutocomplete] = useState(false)
     const [focusedIndex, setFocusedIndex] = useState(-1)
     const [showHintOnBrokenImage, setShowHintOnBrokenImage] = useState(false)
+    const [lastAuthor, setLastAuthor] = useState<string[]>([])
 
     const autocompleteRef = useRef<HTMLDivElement>(null)
     const guessesListRef = useRef<HTMLDivElement>(null)
@@ -39,7 +40,7 @@ const GVPContainer = () => {
 
     const guessesAutocomplete: Member[] = useMemo(
         () =>
-            userGuess.length > 0 && showAutocomplete
+            userGuess.length > 1 && showAutocomplete
                 ? members.filter((member) => member.displayName?.toLowerCase().includes(userGuess.toLowerCase()) || member.nickname?.toLowerCase().includes(userGuess.toLowerCase()))
                 : [],
         [userGuess, showAutocomplete]
@@ -48,6 +49,7 @@ const GVPContainer = () => {
     const shotsUrl = currentShot?.thumbnailUrl.replace("https://cdn.framedsc.com", "framedsc")
     // ItsYFP: 158655628531859456, Denis_VP (can't remember why): 411108650720034817
     const blacklist = ["411108650720034817"]
+    const bufferSize = members.length > 20 ? 20 : members.length
     const isBlacklisted = currentShot && blacklist.includes(currentShot?.author)
 
     const getHof = async () => {
@@ -80,8 +82,22 @@ const GVPContainer = () => {
         setShowAutocomplete(false)
     }
 
-    const goUpward = () => setFocusedIndex((prev) => (prev > 0 ? prev - 1 : guessesAutocomplete.length - 1))
-    const goDownward = () => setFocusedIndex((prev) => (prev < guessesAutocomplete.length - 1 ? prev + 1 : 0))
+    const scrollIntoViewFocusedElement = (index: number) => {
+        const focusedElement = autocompleteRef.current?.querySelectorAll(".gvp__guesses__autocomplete__item")
+        if (focusedElement && focusedElement[index])
+            focusedElement[index].scrollIntoView(true)
+    }
+
+    const goUpward = () => setFocusedIndex((prev) => {
+        const newIndex = prev > 0 ? prev - 1 : guessesAutocomplete.length - 1
+        scrollIntoViewFocusedElement(newIndex)
+        return newIndex
+    })
+    const goDownward = () => setFocusedIndex((prev) => {
+        const newIndex = prev < guessesAutocomplete.length - 1 ? prev + 1 : 0 
+        scrollIntoViewFocusedElement(newIndex)
+        return newIndex
+    })
 
     useKeyPress(["Escape"], "", () => setShowAutocomplete(false))
 
@@ -153,11 +169,23 @@ const GVPContainer = () => {
         //     return shot
         let shot: any
         let member: any
+        let loopCount = 0
         while (true) {
             shot = shots[Math.floor(Math.random() * shots.length)]
             if (blacklist.includes(shot.author)) continue
+            if (lastAuthor.includes(shot.author)) continue
             member = members.find((member) => member.userId == shot.author)
             if (member) break
+        }
+        setLastAuthor((prev) => {
+            prev.unshift(shot.author)
+            return prev
+        })
+        if (lastAuthor.length > bufferSize) {
+            setLastAuthor((prev) => {
+                prev.pop()
+                return prev
+            })
         }
         setCurrentShotAuthor(member)
         setCurrentShot(shot)
