@@ -33,6 +33,7 @@ const GVPContainer = () => {
     const [focusedIndex, setFocusedIndex] = useState(-1)
     const [showHintOnBrokenImage, setShowHintOnBrokenImage] = useState(false)
     const [lastAuthor, setLastAuthor] = useState<string[]>([])
+    const [currentGameTries, setCurrentGameTries] = useState(0)
 
     const autocompleteRef = useRef<HTMLDivElement>(null)
     const guessesListRef = useRef<HTMLDivElement>(null)
@@ -51,6 +52,9 @@ const GVPContainer = () => {
     const blacklist = ["411108650720034817"]
     const bufferSize = members.length > 20 ? 20 : members.length
     const isBlacklisted = currentShot && blacklist.includes(currentShot?.author)
+    const triesCountBeforeHint1 = 12
+    const triesCountBeforeHint2 = 18
+    const triesCountBeforeHint3 = 23
 
     const getHof = async () => {
         const response = await fetch(`/api/hof?guildId=${guildId}`)
@@ -200,9 +204,16 @@ const GVPContainer = () => {
             setUserGuess("")
             inputRef.current?.focus()
             guessesListRef.current?.scrollTo(0, guessesListRef.current?.scrollHeight)
+            setCurrentGameTries((prev) => prev + 1)
+            if (currentGameTries === triesCountBeforeHint1 || currentGameTries === triesCountBeforeHint2 || currentGameTries === triesCountBeforeHint3) {
+                const hintNumber = currentGameTries === triesCountBeforeHint1 ? 1 : currentGameTries === triesCountBeforeHint2 ? 2 : 3
+                room.send("newGuess", { player: currentPlayer, message: "Hint: " + currentShotAuthor?.displayName.slice(0, hintNumber), hasWon: true })
+            }
             if (userGuess === currentShotAuthor?.displayName || userGuess === currentShotAuthor?.nickname) {
-                room.send("newGuess", { player: currentPlayer, message: "TESTSETSETSE", hasWon: true, author: currentShotAuthor?.displayName})
+                // hasWon should've been called botMessage
+                room.send("newGuess", { player: currentPlayer, message: "", hasWon: true, author: currentShotAuthor?.displayName})
                 getRandomHofShot()
+                setCurrentGameTries(0)
             }
         }
     }
@@ -245,7 +256,11 @@ const GVPContainer = () => {
         
                                         return guess.hasWon ? (
                                             <div className="gvp__guesses__item__winner">
-                                                {guess.player.name} found who's that VP! It was {guess.author}!
+                                                {guess.message.length > 0 ? (
+                                                    <>{guess.message}</>
+                                                ) : (
+                                                    <>{guess.player.name} found who's that VP! It was {guess.author}!</>
+                                                )}
                                             </div>
                                         ) : (
                                             <div key={i} className={`gvp__guesses__item ${isSameUserBefore ? "message__only" : ""}`}>
