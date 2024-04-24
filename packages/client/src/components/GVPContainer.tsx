@@ -6,6 +6,7 @@ import { useGame } from "../hooks/useGameContext"
 import { useOutsideAlerter } from "../hooks/useOutsideAlerter"
 import { useKeyPress } from "../hooks/useKeyPress"
 import { usePlayers } from "../hooks/usePlayers"
+import { useIsPiP } from "../hooks/useIsPiP"
 
 interface Member {
     displayAvatarURL: string
@@ -22,6 +23,7 @@ const GVPContainer = () => {
     const currentMemberId = guildMember?.user?.id
     const { shot: synchronizedShot, author: synchronizedAuthor, guesses } = useGame()
     const players = usePlayers()
+    const isPiP = useIsPiP()
     const currentPlayer = players.find((player) => player.userId === currentMemberId)
     const [shots, setShots] = useState([])
     const [members, setMembers] = useState<Member[]>([])
@@ -214,6 +216,7 @@ const GVPContainer = () => {
                 room.send("newGuess", { player: currentPlayer, message: "", hasWon: true, author: currentShotAuthor?.displayName})
                 getRandomHofShot()
                 setCurrentGameTries(0)
+                setShowHintOnBrokenImage(false)
             }
         }
     }
@@ -230,8 +233,8 @@ const GVPContainer = () => {
                     </div>
                 ) : (
                     <>
-                        <div className="gvp__image" style={{ "--shot-url": `url('${currentShot?.thumbnailUrl}')` } as any}>
-                            <div className="gvp__blurred-image">
+                        <div className={`gvp__image ${isPiP ? "gvp__pip" : ""}`} style={{ "--shot-url": `url('${currentShot?.thumbnailUrl}')` } as any}>
+                            <div className={`gvp__blurred-image ${isPiP ? "gvp__pip" : ""}`}>
                                 <img
                                     src={shotsUrl}
                                     alt=""
