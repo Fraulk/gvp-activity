@@ -137,7 +137,7 @@ const GVPContainer = () => {
     }, [synchronizedAuthor])
 
     useEffect(() => {
-        if (guessesListRef.current && guessesListRef.current.scrollTop + guessesListRef.current.clientHeight + 48 >= guessesListRef.current.scrollHeight)
+        if (guessesListRef.current && guessesListRef.current.scrollTop + guessesListRef.current.clientHeight + 73 >= guessesListRef.current.scrollHeight)
             guessesListRef.current?.scrollTo(0, guessesListRef.current?.scrollHeight)
     }, [guesses])
 
@@ -199,6 +199,7 @@ const GVPContainer = () => {
             room.send("newGuess", { player: currentPlayer, message: userGuess })
             setUserGuess("")
             inputRef.current?.focus()
+            guessesListRef.current?.scrollTo(0, guessesListRef.current?.scrollHeight)
             if (userGuess === currentShotAuthor?.displayName || userGuess === currentShotAuthor?.nickname) {
                 room.send("newGuess", { player: currentPlayer, message: "TESTSETSETSE", hasWon: true, author: currentShotAuthor?.displayName})
                 getRandomHofShot()
