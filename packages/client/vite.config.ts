@@ -14,7 +14,7 @@ export default defineConfig({
     proxy: {
       '/api': {
         // target: 'http://localhost:3001', // dev
-        target: 'https://gvp-activity.fly.dev/', // prod
+        target: 'https://gvp-activity.fly.dev', // prod
         changeOrigin: true,
         secure: false,
         ws: true,
