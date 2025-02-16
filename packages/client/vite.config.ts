@@ -11,16 +11,16 @@ export default defineConfig({
   plugins: [react()],
   envDir: '../../',
   server: {
-    // proxy: {
-    //   '/api': {
-    //     // target: 'http://localhost:3001', // dev
-    //     target: 'https://gvp-activity.fly.dev', // prod
-    //     changeOrigin: true,
-    //     secure: false,
-    //     ws: true,
-    //     rewrite: (path) => path.replace(/^\/api/, ''),
-    //   },
-    // },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001', // dev
+        // target: 'https://gvp-activity.fly.dev', // prod
+        changeOrigin: true,
+        secure: false,
+        ws: true,
+        rewrite: path => path.replace(/^\/\.proxy/, '')
+      },
+    },
     hmr: {
       clientPort: 443,
     },

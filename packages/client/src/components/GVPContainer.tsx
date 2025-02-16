@@ -59,7 +59,7 @@ const GVPContainer = () => {
     const triesCountBeforeHint3 = 23
 
     const getHof = async () => {
-        const response = await fetch(`/api/hof?guildId=${guildId}`)
+        const response = await fetch(`/.proxy/api/hof?guildId=${guildId}`)
         const resJson = await response.json()
         const { shots, members } = resJson
         setShots(shots)
@@ -228,7 +228,7 @@ const GVPContainer = () => {
                 {currentShot == undefined ? (
                     <div className="gvp__startGame">
                         <div className="gvp__startGame__title">Welcome to Guess Who's That VP!</div>
-                        <div className="gvp__startGame__description">This is the discord activity version of the game, playable only in VC</div>
+                        <div className="gvp__startGame__description">This is the discord activity version of the game</div>
                         <button onClick={getRandomHofShot}>Start Game</button>
                     </div>
                 ) : (

@@ -58,7 +58,7 @@ if (process.env.NODE_ENV === 'production') {
 // If you don't want people accessing your server stats, comment this line.
 router.use('/colyseus', monitor(server as Partial<MonitorOptions>));
 
-router.get('/hof', async (req: Request, res: Response) => {
+router.get('/api/hof', async (req: Request, res: Response) => {
   const response = await fetch("https://raw.githubusercontent.com/originalnicodrgitbot/hall-of-framed-db/main/shotsdb.json")
   const resJson = await response.json()
   // DO NOT LOG THE WHOLE JSON, IT'S HUGE LIKE OVER 9000
@@ -69,7 +69,7 @@ router.get('/hof', async (req: Request, res: Response) => {
 });
 
 // Fetch token from developer portal and return to the embedded app
-router.post('/token', async (req: Request, res: Response) => {
+router.post('/api/token', async (req: Request, res: Response) => {
   const response = await fetch(`https://discord.com/api/oauth2/token`, {
     method: 'POST',
     headers: {
