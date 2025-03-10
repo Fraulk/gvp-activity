@@ -2,7 +2,7 @@ import * as React from 'react';
 import {Client, Room} from 'colyseus.js';
 
 import {State} from '../../../server/src/entities/State';
-import {GAME_NAME} from '../../../server/src/shared/Constants';
+// import {GAME_NAME} from '../../../server/src/shared/Constants';
 
 import {discordSdk} from '../discordSdk';
 import {LoadingScreen} from '../components/LoadingScreen';
@@ -183,7 +183,8 @@ function useAuthenticatedContextSetup() {
       });
 
       // The second argument has to include for the room as well as the current player
-      const newRoom = await client.joinOrCreate<State>(GAME_NAME, {
+      // GAME NAME MUST MATCH THE SERVER GAME NAME IN ../../../server/src/shared/Constants
+      const newRoom = await client.joinOrCreate<State>("game", {
         channelId: discordSdk.channelId,
         roomName,
         userId: newAuth.user.id,

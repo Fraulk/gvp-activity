@@ -2,7 +2,6 @@
   "name": "server",
   "version": "0.1.0",
   "description": "The app server",
-  "main": "index.js",
   "scripts": {
     "start": "npm-run-all build start:dev",
     "start:dev": "node ./dist/app.js",
