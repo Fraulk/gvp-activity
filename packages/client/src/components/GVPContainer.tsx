@@ -59,7 +59,7 @@ const GVPContainer = () => {
     const triesCountBeforeHint3 = 23
 
     const getHof = async () => {
-        const response = await fetch(`/.proxy/api/hof?guildId=${guildId}`)
+        const response = await fetch(`/${import.meta.env.PROD ? "" : ".proxy/"}api/hof?guildId=${guildId}`)
         const resJson = await response.json()
         const { shots, members } = resJson
         setShots(shots)
