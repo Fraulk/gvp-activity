@@ -91,7 +91,7 @@ function useAuthenticatedContextSetup() {
       });
 
       // Retrieve an access_token from your embedded app's server
-      const response = await fetch(`/${import.meta.env.PROD ? "" : ".proxy/"}api/token`, {
+      const response = await fetch(`/.proxy/api/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -152,7 +152,7 @@ function useAuthenticatedContextSetup() {
       // Done with discord-specific setup
 
       // Now we create a colyseus client
-      const wsUrl = `wss://${location.host}/${import.meta.env.PROD ? "" : ".proxy/"}api/colyseus`;
+      const wsUrl = `wss://${location.host}/.proxy/api/colyseus`;
       const client = new Client(wsUrl);
 
       let roomName = 'Channel';
