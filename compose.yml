@@ -16,7 +16,9 @@ services:
       - ./certbot/www/:/var/www/certbot/:rw
       - ./certbot/conf/:/etc/letsencrypt/:rw
   server:
+    container_name: server
     build: ./packages/server
+    restart: always
     env_file:
       - .env
     ports:
